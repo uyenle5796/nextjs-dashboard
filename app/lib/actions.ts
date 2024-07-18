@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 /* Server Actions - async functions executed on the server, using 'use server' directive
-    Secure: protect against web attacks, secure data and ensure authorized access
+    Protect against web attacks, secure data and ensure authorized access
     Can be called in both Client and Server components
     Progressive enhancement: allow users to interact with the form and submit data even if JavaScript hasn't been loaded or fails to load
     Deeply intergrated with NextJS caching - revalidate the associated cache using APIs like revalidatePath() and revalidateTag()
@@ -35,10 +35,16 @@ export async function createInvoice(formData: FormData) {
   const date = new Date().toISOString().split("T")[0];
 
   // insert data to database
-  await sql`
+  try {
+    await sql`
   INSERT INTO invoices (customer_id, amount, status, date)
   VALUES (${customerId}, ${amountInCents}, ${status}, ${date})
 `;
+  } catch (error) {
+    return {
+      message: `Database Error: Failed to create invoice with error ${error}`,
+    };
+  }
 
   revalidatePath("/dashboard/invoices"); // clear cache and trigger a new request to the server to always get fresh data
   redirect("/dashboard/invoices"); // redirect user back to /dashboard/invoices
@@ -52,18 +58,37 @@ export async function updateInvoice(id: string, formData: FormData) {
   });
   const amountInCents = amount * 100;
 
-  // insert data to database
-  await sql`
+  try {
+    await sql`
       UPDATE invoices
       SET customer_id = ${customerId}, amount = ${amountInCents}, status = ${status}
       WHERE id = ${id}
     `;
+    return {
+      message: `Successfully updated invoice ${id}`,
+    };
+  } catch (error) {
+    return {
+      message: `Database Error: Failed to update invoice with error ${error}`,
+    };
+  }
 
   revalidatePath("/dashboard/invoices");
   redirect("/dashboard/invoices");
 }
 
 export async function deleteInvoice(id: string) {
-  await sql`DELETE FROM invoices WHERE id=${id}`;
-  revalidatePath("/dashboard/invoices");
+  //   throw new Error("Failed to Delete Invoice"); // TEMP - to test error.tsx working only!
+
+  try {
+    await sql`DELETE FROM invoices WHERE id=${id}`;
+    revalidatePath("/dashboard/invoices");
+    return {
+      message: `Successfully deleted invoice ${id}`,
+    };
+  } catch (error) {
+    return {
+      message: `Database Error: Failed to delete invoice with error ${error}`,
+    };
+  }
 }
