@@ -9,6 +9,17 @@ import {
 } from "./definitions";
 import { formatCurrency } from "./utils";
 
+export async function fetchUser() {
+  try {
+    const data = await sql<User>`SELECT * FROM users`;
+    const user = data.rows;
+    return user;
+  } catch (err) {
+    console.error("Database Error:", err);
+    throw new Error("Failed to fetch user.");
+  }
+}
+
 export async function fetchRevenue() {
   try {
     // Artificially delay a response for demo purposes. Don't do this in production :)
@@ -45,8 +56,7 @@ export async function fetchLatestInvoices() {
 export async function fetchCardData() {
   try {
     // You can probably combine these into a single SQL query
-    // However, we are intentionally splitting them to demonstrate
-    // how to initialize multiple queries in parallel with JS.
+    // However, we are intentionally splitting them to demonstrate how to initialize multiple queries in parallel with JS.
     const invoiceCountPromise = sql`SELECT COUNT(*) FROM invoices`;
     const customerCountPromise = sql`SELECT COUNT(*) FROM customers`;
     const invoiceStatusPromise = sql`SELECT
@@ -162,13 +172,9 @@ export async function fetchInvoiceById(id: string) {
 export async function fetchCustomers() {
   try {
     const data = await sql<CustomerField>`
-      SELECT
-        id,
-        name
-      FROM customers
+      SELECT * FROM customers
       ORDER BY name ASC
     `;
-
     const customers = data.rows;
     return customers;
   } catch (err) {
@@ -184,6 +190,11 @@ export async function fetchFilteredCustomers(query: string) {
 		  customers.id,
 		  customers.name,
 		  customers.email,
+      customers.phone_number,
+      customers.address,
+      customers.city,
+      customers.postcode,
+      customers.country,
 		  customers.image_url,
 		  COUNT(invoices.id) AS total_invoices,
 		  SUM(CASE WHEN invoices.status = 'pending' THEN invoices.amount ELSE 0 END) AS total_pending,

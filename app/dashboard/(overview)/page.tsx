@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   title: "Dashboard",
 };
 
-export default async function Page() {
+export default async function DashboardPage() {
   return (
     <main>
       <h1 className={`${lusitana.className} mb-4 text-xl md:text-2xl`}>

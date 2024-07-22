@@ -11,7 +11,13 @@ async function seedUsers() {
       id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
       name VARCHAR(255) NOT NULL,
       email TEXT NOT NULL UNIQUE,
-      password TEXT NOT NULL
+      password TEXT NOT NULL,
+      phone_number VARCHAR(255) NOT NULL,
+      address VARCHAR(255) NOT NULL,
+      city VARCHAR(255) NOT NULL,
+      postcode VARCHAR(255) NOT NULL,
+      country VARCHAR(255) NOT NULL,
+      image_url VARCHAR(255) NOT NULL
     );
   `;
 
@@ -19,8 +25,8 @@ async function seedUsers() {
     users.map(async (user) => {
       const hashedPassword = await bcrypt.hash(user.password, 10);
       return client.sql`
-        INSERT INTO users (id, name, email, password)
-        VALUES (${user.id}, ${user.name}, ${user.email}, ${hashedPassword})
+        INSERT INTO users (id, name, email, password, phone_number, address, city, postcode, country, image_url)
+        VALUES (${user.id}, ${user.name}, ${user.email}, ${hashedPassword}, ${user.phone_number}, ${user.address}, ${user.city}, ${user.postcode}, ${user.country}, ${user.image_url})
         ON CONFLICT (id) DO NOTHING;
       `;
     })
@@ -63,6 +69,11 @@ async function seedCustomers() {
       id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
       name VARCHAR(255) NOT NULL,
       email VARCHAR(255) NOT NULL,
+      phone_number VARCHAR(255) NOT NULL,
+      address VARCHAR(255) NOT NULL,
+      city VARCHAR(255) NOT NULL,
+      postcode VARCHAR(255) NOT NULL,
+      country VARCHAR(255) NOT NULL,
       image_url VARCHAR(255) NOT NULL
     );
   `;
@@ -70,8 +81,8 @@ async function seedCustomers() {
   const insertedCustomers = await Promise.all(
     customers.map(
       (customer) => client.sql`
-        INSERT INTO customers (id, name, email, image_url)
-        VALUES (${customer.id}, ${customer.name}, ${customer.email}, ${customer.image_url})
+        INSERT INTO customers (id, name, email, phone_number, address, city, postcode, country, image_url)
+        VALUES (${customer.id}, ${customer.name}, ${customer.email}, ${customer.phone_number}, ${customer.address}, ${customer.city}, ${customer.postcode}, ${customer.country}, ${customer.image_url})
         ON CONFLICT (id) DO NOTHING;
       `
     )
