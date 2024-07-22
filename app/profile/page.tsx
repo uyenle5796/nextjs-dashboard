@@ -1,21 +1,28 @@
 import AcmeLogo from "@/app/ui/acme-logo";
+import { Suspense } from "react";
 import { Metadata } from "next";
+import { lusitana } from "@/app/ui/fonts";
+import { User } from "@/app/lib/definitions";
+import { fetchUser } from "@/app/lib/data";
+import { CardsSkeleton } from "@/app/ui/skeletons";
+import ProfileCard from "@/app/ui/profile/profile-card";
 
 export const metadata: Metadata = {
   title: "Profile",
 };
 
-export default function ProfilePage() {
+export default async function ProfilePage() {
+  const user: User = await fetchUser();
+
   return (
-    <main className="flex items-center justify-center md:h-screen">
-      <div className="relative mx-auto flex w-full max-w-[400px] flex-col space-y-2.5 p-4 md:-mt-32">
-        <div className="flex h-20 w-full items-end rounded-lg bg-blue-500 p-3 md:h-36">
-          <div className="w-32 text-white md:w-36">
-            <AcmeLogo />
-          </div>
-        </div>
-        Profile page!!!
+    <div className="w-full">
+      <div className="flex w-full items-center justify-between">
+        <h1 className={`${lusitana.className} text-2xl`}>Profile</h1>
       </div>
-    </main>
+      <br />
+      <Suspense fallback={<CardsSkeleton />}>
+        <ProfileCard user={user[0]} />
+      </Suspense>
+    </div>
   );
 }

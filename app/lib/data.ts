@@ -13,6 +13,7 @@ export async function fetchUser() {
   try {
     const data = await sql<User>`SELECT * FROM users`;
     const user = data.rows;
+    console.log("fetchUser ", user);
     return user;
   } catch (err) {
     console.error("Database Error:", err);
